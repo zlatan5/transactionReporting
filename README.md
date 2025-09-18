@@ -1,6 +1,9 @@
 # Pismo Transaction Service
 
-A Spring Boot application for managing financial transactions with different operation types.
+A transaction service implementation with two runnable options:
+
+- Go (Gin + GORM, SQLite in-memory)
+- Spring Boot (Java) — original implementation
 
 ## Features
 
@@ -33,12 +36,9 @@ A Spring Boot application for managing financial transactions with different ope
 
 ## Technology Stack
 
-- **Java 17**
-- **Spring Boot 3.2.0**
-- **Spring Data JPA**
-- **H2 Database** (in-memory)
-- **Maven**
-- **Docker**
+- Go 1.22, Gin, GORM, SQLite (in-memory)
+- Java 17, Spring Boot 3.2.0, Spring Data JPA, H2 (in-memory)
+- Docker / Docker Compose
 
 ## Getting Started
 
@@ -50,22 +50,29 @@ A Spring Boot application for managing financial transactions with different ope
 
 ### Running the Application
 
-#### Using Maven
+#### Option A: Go service (recommended)
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd pismo-transaction-service
-
-# Run the application
-./mvnw spring-boot:run
+# From repo root
+cd go-app
+go mod tidy
+go build ./cmd/server
+./server
+# Service runs at http://localhost:8080/api/v1
 ```
 
-#### Using Docker
+With Docker:
 
 ```bash
-# Build and run with Docker Compose
-docker-compose up --build
+docker compose up --build
+# go-transaction-service listens on 8080
+```
+
+#### Option B: Java Spring Boot
+
+```bash
+# From repo root
+./mvnw spring-boot:run
 ```
 
 ### Accessing the Application
@@ -114,31 +121,14 @@ Run the test suite:
 ./mvnw test
 ```
 
-## Project Structure
+## Project Structure (high level)
 
 ```
-src/
-├── main/
-│   ├── java/com/pismo/transaction/
-│   │   ├── PismoTransactionApplication.java
-│   │   ├── config/
-│   │   ├── controller/
-│   │   ├── domain/
-│   │   │   ├── entity/
-│   │   │   ├── repository/
-│   │   │   └── service/
-│   │   ├── dto/
-│   │   │   ├── request/
-│   │   │   └── response/
-│   │   ├── exception/
-│   │   └── util/
-│   └── resources/
-│       ├── application.yml
-│       └── data.sql
-└── test/
-    └── java/com/pismo/transaction/
-        ├── controller/
-        └── service/
+go-app/
+  cmd/server/main.go
+  internal/{db,handler,model,router,seed,service}
+
+src/main/java/com/pismo/transaction/... (Spring Boot option)
 ```
 
 ## Database Schema
@@ -171,14 +161,11 @@ src/
    - Operation Type ID: Required, must exist
    - Amount: Required, must be positive
 
-## Contributing
+## Notes
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+- Go service seeds operation types (1..4) on startup.
+- Go uses in-memory SQLite shared cache.
+- Compose runs the Go service by default (`go-transaction-service`).
 
 ## License
 
